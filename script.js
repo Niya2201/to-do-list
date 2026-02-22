@@ -2,6 +2,40 @@ const list = document.getElementById("activeList");
 const completedList = document.getElementById("completedList");
 const inputField = document.getElementById("todoInput");
 
+// Save all tasks to localStorage
+function saveTasks() {
+    const activeTasks = [];
+    document.querySelectorAll('#activeList .todo-text').forEach(span => {
+        activeTasks.push(span.innerText);
+    });
+
+    const completedTasks = [];
+    document.querySelectorAll('#completedList .todo-text').forEach(span => {
+        completedTasks.push(span.innerText);
+    });
+
+    localStorage.setItem('activeTasks', JSON.stringify(activeTasks));
+    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+}
+
+// Load tasks from localStorage on page load
+function loadTasks() {
+    const activeTasks = JSON.parse(localStorage.getItem('activeTasks')) || [];
+    const completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
+
+    activeTasks.forEach(taskText => {
+        const newItem = createTodoItem(taskText);
+        list.appendChild(newItem);
+    });
+
+    completedTasks.forEach(taskText => {
+        const newItem = createTodoItem(taskText);
+        newItem.querySelector('input[type="checkbox"]').checked = true;
+        newItem.classList.add('completed');
+        completedList.appendChild(newItem);
+    });
+}
+
 // Helper: close all open control panels
 function closeAllControls() {
     document.querySelectorAll(".controls").forEach(function (c) {
@@ -25,6 +59,7 @@ function createTodoItem(taskText) {
         li.classList.remove("completed");
         list.appendChild(li);            // move back to active section
     }
+    saveTasks();
     });
 
     // Task text (visible normally)
@@ -67,6 +102,7 @@ function createTodoItem(taskText) {
     e.stopPropagation();
     let prev = li.previousElementSibling;
     if (prev) li.parentNode.insertBefore(li, prev);
+    saveTasks();
     });
 
 
@@ -76,6 +112,7 @@ function createTodoItem(taskText) {
     e.stopPropagation();
     let next = li.nextElementSibling;
     if (next) li.parentNode.insertBefore(next, li);
+    saveTasks();
     });
 
 
@@ -87,6 +124,7 @@ del.addEventListener("click", function (e) {
     const confirmDelete = confirm("Are you sure you want to delete this task?");
     if (confirmDelete) {
         li.remove();
+        saveTasks();
     }
 });
 
@@ -135,6 +173,7 @@ function enterEditMode(li, span, editBtn, drag) {
         }
         span.innerText = newText;
         cleanup();
+        saveTasks();
     });
 
     let cancelBtn = document.createElement('span');
@@ -163,6 +202,7 @@ function enterEditMode(li, span, editBtn, drag) {
             }
             span.innerText = newText;
             cleanup();
+            saveTasks();
         } else if (e.key === 'Escape') {
             cleanup();
         }
@@ -189,9 +229,13 @@ document.getElementById("addBtn").addEventListener("click", function () {
     let newItem = createTodoItem(task);
     list.appendChild(newItem);
     inputField.value = "";
+    saveTasks();
 });
 
 // Global click closes all control panels (but not edit mode)
 document.addEventListener("click", function () {
     closeAllControls();
 });
+
+// Load tasks when the page is ready
+document.addEventListener('DOMContentLoaded', loadTasks);
