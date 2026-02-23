@@ -137,4 +137,48 @@ document.getElementById("addBtn").addEventListener("click", function () {
 });
 
 // Load when page ready
-document.addEventListener("DOMContentLoaded", loadTasks);
+// Filter functionality
+
+// Load when page ready
+document.addEventListener("DOMContentLoaded", function () {
+
+    loadTasks();
+
+    // Filter functionality
+    const categoryFilter = document.getElementById("categoryFilter");
+    const priorityFilter = document.getElementById("priorityFilter");
+
+    function filterTasks() {
+
+        const selectedCategory = categoryFilter.value;
+        const selectedPriority = priorityFilter.value;
+
+        document.querySelectorAll(".todo-item").forEach(task => {
+
+            const taskCategory = task.dataset.category;
+            const taskPriority = task.dataset.priority;
+
+            const categoryMatch =
+                selectedCategory === "All" || taskCategory === selectedCategory;
+
+            const priorityMatch =
+                selectedPriority === "All" || taskPriority === selectedPriority;
+
+            if (categoryMatch && priorityMatch) {
+
+                task.style.display = "flex";
+
+            } else {
+
+                task.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+    categoryFilter.addEventListener("change", filterTasks);
+    priorityFilter.addEventListener("change", filterTasks);
+
+});
